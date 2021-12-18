@@ -54,7 +54,7 @@ public class AnimesController {
     }
 
     @PostMapping(path="delete")
-    public ResponseEntity<Anime>delete(@RequestBody @Valid AnimeDeleteRequestBody animeDeleteRequestBody){
+    public ResponseEntity<Void>delete(@RequestBody @Valid AnimeDeleteRequestBody animeDeleteRequestBody){
         animeService.delete(animeDeleteRequestBody.getId());
         return new ResponseEntity(HttpStatus.OK);
     }

@@ -1,4 +1,4 @@
-package academy.devdojo.springboot2.util;
+package academy.devdojo.springboot2.util.anime;
 
 import academy.devdojo.springboot2.domain.Anime;
 
@@ -9,7 +9,7 @@ public class AnimeCreator {
 
     public static Anime createValidAnime(){
         return Anime.builder()
-                .name("Teste")
+                .name(createAnimeToBeSaved().getName())
                 .id(11L)
                 .build();
     }
@@ -17,7 +17,8 @@ public class AnimeCreator {
     public static Anime createValidUpdateAnime(){
         return Anime.builder()
                 .name("UpdatedAnime")
-                .id(11L)
+                .id(createValidAnime().getId())
                 .build();
     }
+
 }
