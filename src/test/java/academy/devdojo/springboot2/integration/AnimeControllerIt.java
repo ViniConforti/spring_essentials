@@ -1,8 +1,9 @@
 package academy.devdojo.springboot2.integration;
-
 import academy.devdojo.springboot2.domain.Anime;
-import academy.devdojo.springboot2.exception.BadRequestException;
 import academy.devdojo.springboot2.repository.AnimeRepository;
+import academy.devdojo.springboot2.requests.anime.AnimeDeleteRequestBody;
+import academy.devdojo.springboot2.requests.anime.AnimePostRequestBody;
+import academy.devdojo.springboot2.requests.anime.AnimePutRequestBody;
 import academy.devdojo.springboot2.util.anime.AnimeCreator;
 import academy.devdojo.springboot2.util.anime.AnimeDeleteRequestBodyCreator;
 import academy.devdojo.springboot2.util.anime.AnimePostRequestBodyCreator;
@@ -12,8 +13,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,8 +22,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.Collections;
 import java.util.List;
 
 /*Antes de fazer o teste de integracao, é necessario inicializar o springboot
@@ -33,6 +32,9 @@ import java.util.List;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase
+
+//Limpa o banco a cada testes executado
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AnimeControllerIt {
 
     @Autowired
@@ -47,12 +49,6 @@ public class AnimeControllerIt {
 
     @LocalServerPort
     private int port;
-
-
-    @BeforeEach
-     void setup(){
-        this.animeRepository.deleteAll();
-     }
 
     @Test
     @DisplayName("Returns a list of animes inside a page object when successful")
@@ -107,16 +103,6 @@ public class AnimeControllerIt {
 
     }
 
-    /*
-    @Test
-    @DisplayName("Throws a bad request exception when anime is not found")
-        //Padrao nomenclatura:Método_O que ele deve fazer_quando
-    void findById_throwsBadRequestException_whenAnimeNotFound(){
-        Assertions.assertThatThrownBy(()-> this.testRestTemplate.getForObject("/anime/{id}",
-                Anime.class,1000L))
-                .isInstanceOf(BadRequestException.class);
-    }*/
-
 
     @Test
     @DisplayName("Returns a list of animes found by name when successful")
@@ -138,16 +124,20 @@ public class AnimeControllerIt {
 
     }
 
-    /*
+
     @Test
     @DisplayName("Returns an empty list when anime is not found")
         //Padrao nomenclatura:Método_O que ele deve fazer_quando
     void findByName_returnsAnEmptyList_whenAnimeNotFound(){
-        BDDMockito.when(animeServiceMock.findByName(ArgumentMatchers.anyString()))
-                .thenReturn(Collections.emptyList());
 
-        List<Anime> foundAnimes = this.animesController.findbyName("123").getBody();
-        Assertions.assertThat(foundAnimes)
+        String url = String.format("/anime/find?name=%s","Nao_Existo");
+
+        List<Anime> animeList = testRestTemplate.exchange(url,
+                HttpMethod.GET,null,
+                new ParameterizedTypeReference<List<Anime>>() {}).getBody();
+
+        Assertions.assertThat(animeList)
+                .isNotNull()
                 .isEmpty();
     }
 
@@ -156,31 +146,41 @@ public class AnimeControllerIt {
         //Padrao nomenclatura:Método_O que ele deve fazer_quando
     void save_ReturnsAnAnime_whenSuccessful(){
 
-        Anime savedAnime = this.animesController.
-                save(AnimePostRequestBodyCreator
-                        .animePostRequestBody()).getBody();
-        Assertions.assertThat(savedAnime)
-                .isNotNull()
-                .isEqualTo(AnimeCreator.createValidAnime());
+        AnimePostRequestBody animePostRequestBody = AnimePostRequestBodyCreator.animePostRequestBody();
 
+        ResponseEntity<Anime> responseEntity = testRestTemplate.postForEntity("/anime",
+                animePostRequestBody,Anime.class);
+
+        Anime savedAnime = responseEntity.getBody();
+
+        Assertions.assertThat(savedAnime.getId()).isNotNull();
+
+        Assertions.assertThat(savedAnime.getName()).isEqualTo(animePostRequestBody.getName());
+
+        Assertions.assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
     }
+
 
     @Test
     @DisplayName("Replace updates anime when successful")
         //Padrao nomenclatura:Método_O que ele deve fazer_quando
     void replace_UpdatesAnime_whenSuccessful(){
 
-        Assertions.assertThatCode
-                        (()-> this.animesController.replace(AnimePutRequestBodyCreator.animePutRequestBody()))
-                .doesNotThrowAnyException();
+        Anime savedAnime = this.animeRepository.save(AnimeCreator.createValidAnime());
 
-        ResponseEntity<Void> entity = this.animesController
-                .replace(AnimePutRequestBodyCreator.animePutRequestBody());
+        AnimePutRequestBody animePutRequestBody =
+                AnimePutRequestBodyCreator.animePutRequestBody();
 
-        Assertions.assertThat(entity).isNotNull();
-        Assertions.assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        animePutRequestBody.setId(savedAnime.getId());
 
+        this.testRestTemplate.put("/anime", animePutRequestBody);
+
+        Assertions.assertThat(this.animeRepository.findAll().get(0).getId())
+                .isEqualTo(animePutRequestBody.getId());
+
+        Assertions.assertThat(this.animeRepository.findAll().get(0).getName())
+                .isEqualTo(animePutRequestBody.getName());
 
     }
 
@@ -188,19 +188,20 @@ public class AnimeControllerIt {
     @DisplayName("Deletes an anime when successful")
         //Padrao nomenclatura:Método_O que ele deve fazer_quando
     void deletes_AnAnime_whenSuccessful(){
+        Anime savedAnime = this.animeRepository.save(AnimeCreator.createValidAnime());
 
-        Assertions.assertThatCode
-                        (()-> this.animesController
-                                .delete(AnimeDeleteRequestBodyCreator.animeDeleteRequestBody()))
-                .doesNotThrowAnyException();
+        AnimeDeleteRequestBody animeDeleteRequestBody =
+                AnimeDeleteRequestBodyCreator.animeDeleteRequestBody();
 
-        ResponseEntity<Void> entity = this.animesController
-                .delete(AnimeDeleteRequestBodyCreator.animeDeleteRequestBody());
+        animeDeleteRequestBody.setId(savedAnime.getId());
 
-        Assertions.assertThat(entity).isNotNull();
-        Assertions.assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<Void> responseEntity =
+                testRestTemplate.postForEntity("/anime/delete",animeDeleteRequestBody,
+                Void.class);
 
-
-    }*/
+        Assertions.assertThat(this.animeRepository.findById(animeDeleteRequestBody.getId()))
+                .isEmpty();
+        Assertions.assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 
 }

@@ -70,6 +70,8 @@ public class AnimeService  {
         //return anime;
         //log.info();
         //log.info(animeMapper.INSTANCE.toAnime(animePostRequestBody));
+        //log.info(animeMapper.INSTANCE.toAnime(animePostRequestBody));
+        log.info(animePostRequestBody);
         return this.animeRepository.save(animeMapper.INSTANCE.toAnime(animePostRequestBody));
     }
 
