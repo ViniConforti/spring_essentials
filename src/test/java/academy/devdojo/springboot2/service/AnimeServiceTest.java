@@ -27,7 +27,7 @@ import java.util.Optional;
 
 
 @ExtendWith(SpringExtension.class)
-@DisplayName("Tests for Anise Service")
+@DisplayName("Tests for Anime Service")
 class AnimeServiceTest {
 
     //Utilizado quando quero testar a classe em si

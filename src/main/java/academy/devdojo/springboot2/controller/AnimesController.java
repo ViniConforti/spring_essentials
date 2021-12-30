@@ -44,33 +44,25 @@ public class AnimesController {
         return new ResponseEntity<>(this.animeService.findByIdOrThrowBadRequestException(id), HttpStatus.OK);
     }
 
-    @GetMapping(path = "by-id/{id}")
-    public ResponseEntity<Anime> findbyIdAuthentication(@PathVariable long id,
-                                                        @AuthenticationPrincipal UserDetails userDetails){
-        log.info(userDetails);
-        return new ResponseEntity<>(this.animeService.findByIdOrThrowBadRequestException(id), HttpStatus.OK);
-    }
-
     //find?name=
     @GetMapping(path = "/find")
     public ResponseEntity<List<Anime>> findbyName(@RequestParam(defaultValue = "") String name){
         return new ResponseEntity<>(this.animeService.findByName(name), HttpStatus.OK);
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(path = "/admin/save")
     public ResponseEntity<Anime>save(@RequestBody @Valid AnimePostRequestBody animePostRequestBody){
         return new ResponseEntity<>(animeService.save(animePostRequestBody), HttpStatus.CREATED);
 
     }
 
-    @PostMapping(path="delete")
+    @PostMapping(path="/admin/delete")
     public ResponseEntity<Void>delete(@RequestBody @Valid AnimeDeleteRequestBody animeDeleteRequestBody){
         animeService.delete(animeDeleteRequestBody.getId());
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping(path = "/admin/replace")
     public ResponseEntity<Void>replace(@RequestBody @Valid AnimePutRequestBody animePutRequestBody){
         animeService.replace(animePutRequestBody);
         return new ResponseEntity(HttpStatus.NO_CONTENT);

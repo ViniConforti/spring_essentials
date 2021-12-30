@@ -43,10 +43,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
          */
 
         //  csrf deve ser habilitado em ambiente de producao
+
         http.csrf().disable()
                 //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 //.and()
-                .authorizeRequests().anyRequest()
+                .authorizeRequests()
+                // Coloca sempre o mais restritivo primeiro
+                .antMatchers("/anime/admin/**").hasRole("ADMIN")
+                .antMatchers("/anime/**").hasRole("USER")
+                .anyRequest()
                 .authenticated()
                 .and()
                 .formLogin()

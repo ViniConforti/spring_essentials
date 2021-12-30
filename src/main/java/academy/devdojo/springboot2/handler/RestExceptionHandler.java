@@ -1,9 +1,6 @@
 package academy.devdojo.springboot2.handler;
 
-import academy.devdojo.springboot2.exception.BadRequestException;
-import academy.devdojo.springboot2.exception.BadRequestExceptionDetails;
-import academy.devdojo.springboot2.exception.ExceptionDetails;
-import academy.devdojo.springboot2.exception.ValidationExceptionDetails;
+import academy.devdojo.springboot2.exception.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
