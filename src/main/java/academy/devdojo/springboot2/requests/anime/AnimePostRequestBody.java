@@ -1,4 +1,5 @@
 package academy.devdojo.springboot2.requests.anime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -12,5 +13,6 @@ import javax.validation.constraints.NotNull;
 @Jacksonized
 public class AnimePostRequestBody {
     @NotNull
+    @Schema(description = "This is the anime name")
     private String name;
 }
