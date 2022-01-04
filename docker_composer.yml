@@ -21,5 +21,18 @@ services:
     ports:
       - 8081:8080
 
+  prometheus:
+    image: bitnami/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      # copiando o prometheus.yml para dentro do container no caminho
+      # /etc/prometheus e colocando o mesmo nome da copia
+
+      - "./src/main/resources/prometheus.yml:/etc/prometheus/prometheus.yml"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
 volumes:
   devdojo_data:

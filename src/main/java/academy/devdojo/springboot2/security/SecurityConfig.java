@@ -51,6 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // Coloca sempre o mais restritivo primeiro
                 .antMatchers("/anime/admin/**").hasRole("ADMIN")
                 .antMatchers("/anime/**").hasRole("USER")
+                .antMatchers("/actuator/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

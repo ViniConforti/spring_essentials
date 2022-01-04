@@ -17,3 +17,9 @@ logging:
       hibernate:
         SQL: DEBUG
         type: trace
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, prometheus

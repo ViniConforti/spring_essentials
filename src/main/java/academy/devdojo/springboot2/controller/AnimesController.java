@@ -6,6 +6,7 @@ import academy.devdojo.springboot2.requests.anime.AnimePostRequestBody;
 import academy.devdojo.springboot2.requests.anime.AnimePutRequestBody;
 import academy.devdojo.springboot2.service.AnimeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,9 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -42,12 +40,19 @@ public class AnimesController {
     }
 
     @GetMapping(path = "/all")
+    @ApiResponse(responseCode = "200", description = "Successfull operation",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Anime.class))))
     public ResponseEntity<List<Anime>> listAll(){
         return new ResponseEntity<>(this.animeService.listAllNonPageable(),
                 HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
+    @ApiResponses(value={
+            @ApiResponse(responseCode = "200", description = "Successfull operation",
+            content= @Content(schema= @Schema(implementation = Anime.class))),
+            @ApiResponse(responseCode = "400", description = "Anime doesnt exists")
+    })
     public ResponseEntity<Anime> findbyId(@PathVariable long id){
         return new ResponseEntity<>(this.animeService.findByIdOrThrowBadRequestException(id), HttpStatus.OK);
     }
@@ -56,7 +61,7 @@ public class AnimesController {
     @GetMapping(path = "/find")
 
     @ApiResponse(responseCode = "200", description = "Successfull operation",
-            content = @Content(schema = @Schema(implementation = Anime.class)))
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Anime.class))))
     public ResponseEntity<List<Anime>> findbyName(@RequestParam(defaultValue = "") String name){
         return new ResponseEntity<>(this.animeService.findByName(name), HttpStatus.OK);
     }
