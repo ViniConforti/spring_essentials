@@ -20,6 +20,11 @@
 		<org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
 		<log4j2.version>2.17.0</log4j2.version>
 		<springdoc-openapi-version>1.6.3</springdoc-openapi-version>
+		<jib.maven.plugin.version>3.1.4</jib.maven.plugin.version>
+		<jib.from.image>adoptopenjdk:11-jre</jib.from.image>
+		<docker.repo.url>confortivini</docker.repo.url>
+		<docker.repo.project>springboot2essentials</docker.repo.project>
+		<docker.image.name>${docker.repo.url}/${docker.repo.project}</docker.image.name>
 	</properties>
 
 	<dependencies>
@@ -180,6 +185,26 @@
 						</path>-->
 						<!-- other annotation processors -->
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>${jib.maven.plugin.version}</version>
+				<configuration>
+					<from>
+						<image>${jib.from.image}</image>
+					</from>
+					<to>
+						<image>${docker.image.name}</image>
+						<tags>
+							<tag>${project.version}</tag>
+						</tags>
+					</to>
+					<container>
+						<mainClass>academy.devdojo.springboot2.Springboot2EssentialsApplication</mainClass>
+					</container>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -1,6 +1,9 @@
 # Use root/example as user/password credentials
 version: '3.1'
-
+x-database-variables: &database-variables
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/anime?createDatabaseIfNotExist=true
+  SPRING_DATASOURCE_USERNAME: root
+  SPRING_DATASOURCE_PASSWORD: admin
 services:
 
   mysql_db:
@@ -41,6 +44,14 @@ services:
       - 3000:3000
     volumes:
       - grafana_data:/var/lib/grafana
+
+  springboot2essentials:
+    image: confortivini/springboot2essentials
+    container_name: spring_boot_essentials_app
+    ports:
+      - 8082:8080
+    environment:
+      <<: *database-variables
 
 volumes:
   devdojo_data:
